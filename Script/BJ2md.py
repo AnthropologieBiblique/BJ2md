@@ -152,33 +152,36 @@ class BibleBook:
 class BibleChapter:
 	def __init__(self,bookTarget,indicePsTable,bookStandardAbbrev,hebraic,hebraicPsTable,lxxPsTable,number,standard_number,language):
 		if bookStandardAbbrev == 'Ps':
-			self.indice = indicePsTable[number]
-			number = hebraicPsTable[number]
 			print(number)
 			if hebraic:
 				if number != hebraicPsTable[number]:
 					self.number = number+' ('+hebraicPsTable[number]+')'
 					self.standard_number = self.number
+					self.indice = number
 				else:
 					self.number = number
 					self.standard_number = standard_number
+					self.indice = number
 			else:
 				if number != lxxPsTable[number]:
 					self.number = number+' ('+lxxPsTable[number]+')'
 					self.standard_number = lxxPsTable[number]+' ('+number+')'
+					self.indice = number
 				else:
 					self.number = number
 					self.standard_number = standard_number
+					self.indice = number
 		else:
 			self.number = number
 			self.indice = number
 			self.standard_number = standard_number
+		self.bookStandardAbbrev = bookStandardAbbrev
 		self.bookTarget = bookTarget
 		self.language = language
 		self.verseList = []
 		self.readVerses()
 	def readVerses(self):
-		path = '../Source/html/'+self.bookTarget
+		path = '../Source/html/'+self.bookStandardAbbrev
 		try:
 			os.mkdir(path)
 		except FileExistsError:
@@ -187,7 +190,7 @@ class BibleChapter:
 			pass
 		else:
 			try:
-			    url = "https://www.aelf.org/bible/"+self.bookTarget+"/"+self.indice
+			    url = "http://otremolet.free.fr/otbiblio/bible/"+self.bookTarget+self.indice+'.html'
 			    headers = {}
 			    headers['User-Agent'] = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.27 Safari/537.17"
 			    req = urllib.request.Request(url, headers = headers)
@@ -202,11 +205,26 @@ class BibleChapter:
 		contents = file.read()
 		soup = BeautifulSoup(contents, 'html.parser')
 		
+		indiceVerset = re.compile(":([0-9|a-z]{1,3})")
+		flag = False
+		verseNumber = ''
+		verseText = ''
+		
 		for data in soup.find_all():
-			if data.name == "p":
-				if data.attrs == {}:
-					verse = BibleVerse(data.contents[0].getText(),'',data.contents[1].strip())
-					self.addVerse(verse)
+			if data.name == "i":
+				if indiceVerset.search(data.getText()) == None:
+					pass
+				else:
+					verseNumber = indiceVerset.search(data.getText()).group(1)
+			if data.name == "td":
+				if data.attrs != {}:
+					flag = True
+				else:
+					if flag == True:
+						verseText = data.getText().replace('\t','').replace('\n',' ')
+						verse = BibleVerse(verseNumber,'',verseText)
+						self.addVerse(verse)
+						flag = False
 
 	def cleanTag(self,string):
 		string = string.replace(" ","")
@@ -246,7 +264,6 @@ class BibleVerse:
 		self.sub_number = sub_number
 		self.verseText = verseText
 
-#aelf = Bible("Bible AELF","AELF",False,"français")
-ref = Bible("Bible AELF","",False,"français")
+bj = Bible("Bible de Jérusalem","BJ",True,"français")
 
 

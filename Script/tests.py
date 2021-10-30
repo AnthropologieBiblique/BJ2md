@@ -31,7 +31,6 @@ def telechargerVersets(livre, chapitre):
 	soup = BeautifulSoup(contents, 'html.parser')
 	
 	indiceVerset = re.compile(":([0-9|a-z]{1,3})")
-
 	flag = False
 	for data in soup.find_all():
 		if data.name == "i":
@@ -48,6 +47,3 @@ def telechargerVersets(livre, chapitre):
 					flag = False
 
 telechargerVersets("ancien/ecclesiaste%0d/qo","12")
-
-#indiceVerset = re.compile(":([0-9|a-z]{1,3})")
-#print(indiceVerset.search("Gn 12:30a-").group(1))
