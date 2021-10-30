@@ -30,16 +30,24 @@ def telechargerVersets(livre, chapitre):
 	contents = file.read()
 	soup = BeautifulSoup(contents, 'html.parser')
 	
+	indiceVerset = re.compile(":([0-9|a-z]{1,3})")
+
 	flag = False
 	for data in soup.find_all():
 		if data.name == "i":
-			print(data.getText())
+			if indiceVerset.search(data.getText()) == None:
+				pass
+			else:
+				print(indiceVerset.search(data.getText()).group(1))
 		if data.name == "td":
 			if data.attrs != {}:
 				flag = True
 			else:
 				if flag == True:
-					print(data.getText().replace('\t','').replace('\n',''))
+					print(data.getText().replace('\t','').replace('\n',' '))
 					flag = False
 
-telechargerVersets("ancien/genese/gn","1")
+telechargerVersets("ancien/ecclesiaste%0d/qo","12")
+
+#indiceVerset = re.compile(":([0-9|a-z]{1,3})")
+#print(indiceVerset.search("Gn 12:30a-").group(1))
